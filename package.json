@@ -1,0 +1,23 @@
+{
+  "name": "bash-converter",
+  "version": "0.1.0",
+  "description": "converting simple bash/shell scripts to windows batch files",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "bash",
+    "shell",
+    "batch",
+    "converter"
+  ],
+  "author": "daniel-schreiber@gmx.de",
+  "license": "ISC",
+  "dependencies": {
+    "bash-parser": "~0.5.0"
+  },
+  "devDependencies": {
+    "typescript": "~3.4.4"
+  }
+}
