@@ -9,4 +9,13 @@ let content = fs.readFileSync(filename).toString();
 content = convertBashToWin(content);
 console.log('updated:\n', content);
 
-// TODO save as *.bat
+const batFilename = filename.replace(/\.sh$/, '.bat');
+if (fs.existsSync(batFilename)) {
+    console.warn(`overwriting ${batFilename} ..`);
+}
+
+fs.writeFileSync(batFilename, content);
+
+console.log(`written result to ${batFilename}`);
+
+
