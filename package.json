@@ -4,7 +4,8 @@
   "description": "converting simple bash/shell scripts to windows batch files",
   "main": "lib/cli.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc"
   },
   "keywords": [
     "bash",

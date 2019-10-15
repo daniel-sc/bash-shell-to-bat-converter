@@ -1,3 +1,4 @@
+// @ts-ignore
 import parse from 'bash-parser'
 
 function changePath(path: string) {
@@ -39,8 +40,9 @@ function convertCommand(command: any): string {
                             return `${command.name.text}${suffix}`;
                         }
                     case 'rm':
-                        const paramList: any[] = command.suffix.filter(s => s.text.match(/-\w+/i));
-                        const argList: any[] = command.suffix.filter(s => !s.text.match(/-\w+/i));
+                        const paramMatcher = /-\w+/i;
+                        const paramList: any[] = command.suffix.filter((s: any) => s.text.match(paramMatcher));
+                        const argList: any[] = command.suffix.filter((s: any) => !s.text.match(paramMatcher));
                         const winParams: string[] = [];
                         paramList.forEach(suffix => {
                             if (suffix.text.indexOf('-') === 0) {
@@ -72,7 +74,7 @@ export function convertBashToWin(script: string) {
     const ast = parse(script, {mode: 'bash'});
     return ast.commands
         .map(convertCommand)
-        .filter(c => !!c) // filter empty commands
+        .filter((c: any) => !!c) // filter empty commands
         .join('\n');
 }
 
