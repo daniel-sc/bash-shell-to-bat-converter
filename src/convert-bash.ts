@@ -1,4 +1,5 @@
 // @ts-ignore
+process = {env: {NODE_NEV: 'mock'}}; // patch for irrelevant node dependency of bash-parser
 import parse from 'bash-parser'
 
 function changePath(path: string) {
