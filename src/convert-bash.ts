@@ -41,8 +41,8 @@ function convertCommand(command: any): string {
                         }
                     case 'rm':
                         const paramMatcher = /-\w+/i;
-                        const paramList: any[] = command.suffix.filter((s: any) => s.text.match(paramMatcher));
-                        const argList: any[] = command.suffix.filter((s: any) => !s.text.match(paramMatcher));
+                        const paramList: any[] = (command.suffix || []).filter((s: any) => s.text.match(paramMatcher));
+                        const argList: any[] = (command.suffix || []).filter((s: any) => !s.text.match(paramMatcher));
                         const winParams: string[] = [];
                         paramList.forEach(suffix => {
                             if (suffix.text.indexOf('-') === 0) {
