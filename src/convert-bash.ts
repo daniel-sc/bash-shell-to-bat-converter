@@ -1,6 +1,8 @@
 // @ts-ignore
 window.process = {env: {NODE_NEV: 'mock'}}; // patch for irrelevant node dependency of bash-parser
 import parse from 'bash-parser'
+import {RmHandler} from './rm-handler';
+import {CpHandler} from './cp-handler';
 
 function changePath(path: string) {
     return path
@@ -19,6 +21,9 @@ function performExpansions(text?: string, expansions?: any[]): string {
     }
     return result;
 }
+
+const rmHandler = new RmHandler(convertCommand);
+const cpHandler = new CpHandler(convertCommand);
 
 function convertCommand(command: any): string {
     let text = performExpansions(command.text, command.expansion);
@@ -41,18 +46,9 @@ function convertCommand(command: any): string {
                             return `${command.name.text}${suffix}`;
                         }
                     case 'rm':
-                        const paramMatcher = /-\w+/i;
-                        const paramList: any[] = (command.suffix || []).filter((s: any) => s.text.match(paramMatcher));
-                        const argList: any[] = (command.suffix || []).filter((s: any) => !s.text.match(paramMatcher));
-                        const winParams: string[] = [];
-                        paramList.forEach(suffix => {
-                            if (suffix.text.indexOf('-') === 0) {
-                                if (suffix.text.indexOf('r') >= 0) {
-                                    winParams.push('/S')
-                                }
-                            }
-                        });
-                        return `del ${winParams.join(' ')} ${argList.map(convertCommand).join(' ')}`; // converting assures paths are fixed..
+                        return rmHandler.handle(command);
+                    case 'cp':
+                        return cpHandler.handle(command);
 
                     default:
                         return `${command.name.text}${suffix}`

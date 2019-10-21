@@ -13,8 +13,13 @@ import {convertBashToWin} from '../../../src/convert-bash';
 export class AppComponent implements OnInit, AfterViewInit {
 
   code$: Observable<string>;
-  bashScript = new FormControl(`SOME_VAR="/c/cygwin/path"
-rm -rf $SOME_VAR`);
+  bashScript = new FormControl(`#!/bin/bash
+
+SOME_VAR="/c/cygwin/path"
+rm -rf $SOME_VAR
+cp /c/some/file /to/another/file
+
+`);
 
   ngOnInit(): void {
 
@@ -22,7 +27,7 @@ rm -rf $SOME_VAR`);
       startWith(this.bashScript.value),
       map(bash => {
         try {
-          if(!bash) {
+          if (!bash) {
             return 'REM enter bash script :)'
           }
           return convertBashToWin(bash);

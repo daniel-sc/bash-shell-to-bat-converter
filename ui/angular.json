@@ -25,6 +25,15 @@
             "aot": false,
             "assets": [
               "src/favicon.ico",
+              "src/android-chrome-192x192.png",
+              "src/android-chrome-512x512.png",
+              "src/apple-touch-icon.png",
+              "src/favicon-16x16.png",
+              "src/favicon-32x32.png",
+              "src/mstile-150x150.png",
+              "src/browserconfig.xml",
+              "src/site.webmanifest",
+              "src/safari-pinned-tab.svg",
               "src/assets"
             ],
             "styles": [

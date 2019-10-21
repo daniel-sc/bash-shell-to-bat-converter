@@ -4,7 +4,7 @@
   <mat-form-field appearance="outline" floatLabel="always" class="code code-bash" color="primary">
     <mat-label>Bash Script</mat-label>
     <textarea [formControl]="bashScript" matInput placeholder="Enter Bash script here.." cdkTextareaAutosize
-              cdkAutosizeMinRows="5"></textarea>
+              cdkAutosizeMinRows="5" (focus)="textInput.select()" #textInput></textarea>
   </mat-form-field>
 
   <mat-form-field appearance="outline" floatLabel="always" class="code code-bat">
