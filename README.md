@@ -9,7 +9,7 @@ Try it online: https://daniel-sc.github.io/bash-shell-to-bat-converter/
 ## Usage
 Setup:
 ```sh
-git clone git@github.com:daniel-sc/bash-shell-to-bat-converter.git
+git clone https://github.com/daniel-sc/bash-shell-to-bat-converter.git
 cd bash-shell-to-bat-converter
 npm install
 npm run tsc
