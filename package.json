@@ -2,6 +2,7 @@
   "name": "bash-converter",
   "version": "0.1.0",
   "description": "converting simple bash/shell scripts to windows batch files",
+  "private": true,
   "main": "lib/cli.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
