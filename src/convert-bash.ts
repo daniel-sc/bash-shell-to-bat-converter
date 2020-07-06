@@ -1,5 +1,7 @@
 // @ts-ignore
-window.process = {env: {NODE_NEV: 'mock'}}; // patch for irrelevant node dependency of bash-parser
+if (typeof window === 'undefined') {
+    window = {process: {env: {NODE_NEV: 'mock'}}}; // patch for irrelevant node dependency of bash-parser
+}
 import parse from 'bash-parser'
 import {RmHandler} from './rm-handler';
 import {CpHandler} from './cp-handler';
