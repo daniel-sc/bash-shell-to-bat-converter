@@ -21,9 +21,11 @@ jobs:
             ${{ runner.os }}-node-
       - name: Build
         run: |
+          npm install
           cd ui
           npm install
           npm run-script build-gh-pages
+          cd ..
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
