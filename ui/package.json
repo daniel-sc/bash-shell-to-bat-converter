@@ -27,7 +27,7 @@
     "@angular/platform-browser": "~8.2.11",
     "@angular/platform-browser-dynamic": "~8.2.11",
     "@angular/router": "~8.2.11",
-    "angular-cli-ghpages": "~0.6.0",
+    "bash-parser": "~0.5.0",
     "highlight.js": "~9.15.10",
     "ngx-highlightjs": "~3.0.3",
     "rxjs": "~6.4.0",
