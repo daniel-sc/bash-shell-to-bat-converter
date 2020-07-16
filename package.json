@@ -15,7 +15,7 @@
     "converter"
   ],
   "author": "daniel-schreiber@gmx.de",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "bash-parser": "~0.5.0",
     "tslib": "~1.10.0"

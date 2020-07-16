@@ -19,6 +19,13 @@ SOME_VAR="/c/cygwin/path"
 rm -rf $SOME_VAR
 cp /c/some/file /to/another/file
 
+my_function () {
+  echo "hello from my_function: $1"
+}
+# call the function:
+my_function
+# call the function with param:
+my_function "some param"
 `);
 
   ngOnInit(): void {
@@ -28,7 +35,7 @@ cp /c/some/file /to/another/file
       map(bash => {
         try {
           if (!bash) {
-            return 'REM enter bash script :)'
+            return 'REM enter bash script :)';
           }
           return convertBashToWin(bash);
         } catch (e) {
