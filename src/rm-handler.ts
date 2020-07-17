@@ -14,6 +14,6 @@ export class RmHandler implements CommandHandler {
                 winParams.push('/S')
             }
         });
-        return `del ${winParams.join(' ')} ${argList.map(this.defaultHandler).join(' ')}`; // converting assures paths are fixed..
+        return `DEL ${winParams.join(' ')} ${argList.map(this.defaultHandler).join(' ')}`; // converting assures paths are fixed..
     }
 }

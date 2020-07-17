@@ -14,6 +14,6 @@ export class CpHandler implements CommandHandler {
                 winParams.push('/L')
             }
         });
-        return `copy ${winParams.join(' ')} ${argList.map(this.defaultHandler).join(' ')}`; // converting assures paths are fixed..
+        return `COPY ${winParams.join(' ')} ${argList.map(this.defaultHandler).join(' ')}`; // converting assures paths are fixed..
     }
 }

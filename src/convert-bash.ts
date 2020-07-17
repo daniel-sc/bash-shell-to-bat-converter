@@ -88,7 +88,7 @@ class ConvertBash {
                 return text;
             case 'AssignmentWord':
                 const [variableName, variableValue] = text.split('=', 2);
-                return `set ${variableName}=${variableValue}`;
+                return `SET ${variableName}=${variableValue}`;
         }
         return 'REM UNKNOWN: ' + JSON.stringify(command);
     }
