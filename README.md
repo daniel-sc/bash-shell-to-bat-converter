@@ -13,6 +13,7 @@ git clone https://github.com/daniel-sc/bash-shell-to-bat-converter.git
 cd bash-shell-to-bat-converter
 npm install
 npm run tsc
+clear
 ``` 
 
 Usage:
@@ -24,3 +25,8 @@ This creates `FILE_TO_CONVERT.bat`.
 ## Contribute
 
 PRs always welcome ;-)
+#bash
+#bash-shell
+#bash-converter
+#bash code
+#bash program
