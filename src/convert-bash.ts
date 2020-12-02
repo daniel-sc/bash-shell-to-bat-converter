@@ -1,7 +1,7 @@
 // patch for irrelevant node dependency of bash-parser:
 if (typeof window === 'undefined') {
     // @ts-ignore
-    window = {process: {env: {NODE_NEV: 'mock'}}};
+    let window = {process: {env: {NODE_NEV: 'mock'}}};
     // @ts-ignore
 } else if (!window.process) {
     // @ts-ignore
