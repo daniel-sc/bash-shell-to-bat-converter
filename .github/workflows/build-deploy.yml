@@ -27,8 +27,12 @@ jobs:
           npm run-script build-gh-pages
           cd ..
       - name: Test
-        run: |
-          npm run-script test
+        run: npm run test-coverage
+      - name: Coveralls
+        uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: run-${{ matrix.node-version }}
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:

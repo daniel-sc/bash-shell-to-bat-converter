@@ -1,5 +1,7 @@
 # Simple Bash script to Windows batch file converter
 
+[![Coverage Status](https://coveralls.io/repos/github/daniel-sc/bash-shell-to-bat-converter/badge.svg?branch=master)](https://coveralls.io/github/daniel-sc/bash-shell-to-bat-converter?branch=master)
+
 Converts bash scripts (`*.sh`) to windows batch files (`*.bat`). 
 This is _not_ supposed to be a fully complete/correct tool, but rather a starting point when converting scripts. 
 For simple scripts this might create correct results.
