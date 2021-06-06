@@ -1,5 +1,6 @@
 # Simple Bash script to Windows batch file converter
 
+[![npm](https://img.shields.io/npm/v/bash-converter)](https://www.npmjs.com/package/bash-converter)
 [![Coverage Status](https://coveralls.io/repos/github/daniel-sc/bash-shell-to-bat-converter/badge.svg?branch=master)](https://coveralls.io/github/daniel-sc/bash-shell-to-bat-converter?branch=master)
 
 Converts bash scripts (`*.sh`) to windows batch files (`*.bat`). 
@@ -9,17 +10,9 @@ For simple scripts this might create correct results.
 Try it online: https://daniel-sc.github.io/bash-shell-to-bat-converter/
 
 ## Usage
-Setup:
-```sh
-git clone https://github.com/daniel-sc/bash-shell-to-bat-converter.git
-cd bash-shell-to-bat-converter
-npm install
-npm run tsc
-``` 
 
-Usage:
 ```sh
-node lib/cli.js FILE_TO_CONVERT.sh
+npx bash-converter FILE_TO_CONVERT.sh
 ```
 This creates `FILE_TO_CONVERT.bat`.
 
