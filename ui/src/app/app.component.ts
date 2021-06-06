@@ -16,7 +16,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   bashScript = new FormControl(`#!/bin/bash
 
 SOME_VAR="/c/cygwin/path"
-rm -rf $SOME_VAR
+rm -rf $SOME_VAR || echo "file not found"
 cp /c/some/file /to/another/file
 
 my_function () {

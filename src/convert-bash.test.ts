@@ -21,6 +21,16 @@ describe('convert-bash', () => {
                 .toEqual('@echo off\n\nDEL /S c:\\cygwin\\path');
         });
 
+        test('should handle "&&"', () => {
+          expect(convertBashToWin('echo "hi 1" && echo "there 2"'))
+              .toEqual('@echo off\n\necho "hi 1" && echo "there 2"');
+        });
+
+        test('should handle "||"', () => {
+          expect(convertBashToWin('echo "hi 1" || echo "there 2"'))
+              .toEqual('@echo off\n\necho "hi 1" || echo "there 2"');
+        });
+
         test('should transform complete example', () => {
             expect(convertBashToWin(
                 `#!/bin/bash

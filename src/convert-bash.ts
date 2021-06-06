@@ -89,6 +89,15 @@ class ConvertBash {
             case 'AssignmentWord':
                 const [variableName, variableValue] = text.split('=', 2);
                 return `SET ${variableName}=${variableValue}`;
+            case 'LogicalExpression':
+                switch (command.op) {
+                    case 'and':
+                        return `${(this.convertCommand(command.left))} && ${(this.convertCommand(command.right))}`;
+                    case 'or':
+                        return `${(this.convertCommand(command.left))} || ${(this.convertCommand(command.right))}`;
+                    default:
+                        return `REM UNKNOWN operand "${command.op}" in: ${JSON.stringify(command)}`;
+                }
         }
         return 'REM UNKNOWN: ' + JSON.stringify(command);
     }
