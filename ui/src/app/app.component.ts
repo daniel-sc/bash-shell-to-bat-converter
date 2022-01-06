@@ -19,6 +19,12 @@ SOME_VAR="/c/cygwin/path"
 rm -rf $SOME_VAR || echo "file not found"
 cp /c/some/file /to/another/file
 
+if [ $SOME_VAR == "" ]; then
+  echo "SOME_VAR is empty"
+else
+  echo "SOME_VAR not empty"
+fi
+
 my_function () {
   echo "hello from my_function: $1"
 }

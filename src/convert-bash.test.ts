@@ -22,13 +22,30 @@ describe('convert-bash', () => {
         });
 
         test('should handle "&&"', () => {
-          expect(convertBashToWin('echo "hi 1" && echo "there 2"'))
-              .toEqual('@echo off\n\necho "hi 1" && echo "there 2"');
+            expect(convertBashToWin('echo "hi 1" && echo "there 2"'))
+                .toEqual('@echo off\n\necho "hi 1" && echo "there 2"');
         });
 
         test('should handle "||"', () => {
-          expect(convertBashToWin('echo "hi 1" || echo "there 2"'))
-              .toEqual('@echo off\n\necho "hi 1" || echo "there 2"');
+            expect(convertBashToWin('echo "hi 1" || echo "there 2"'))
+                .toEqual('@echo off\n\necho "hi 1" || echo "there 2"');
+        });
+
+        test('should handle simple if', () => {
+            expect(convertBashToWin('if [ "$my_var" == "" ]; then\n' +
+                '  echo "my_var is empty"\n' +
+                '  echo "second line"\n' +
+                'fi'))
+                .toEqual('@echo off\n\nIF "%my_var%" == "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+        });
+
+        test('should handle if-else', () => {
+            expect(convertBashToWin('if [ "$my_var" == "" ]; then\n' +
+                '  echo "my_var is empty"\n' +
+                'else\n' +
+                '  echo "my_var is not empty"\n' +
+                'fi'))
+                .toEqual('@echo off\n\nIF "%my_var%" == "" (\n  echo "my_var is empty"\n) ELSE (\n  echo "my_var is not empty"\n)');
         });
 
         test('should transform complete example', () => {

@@ -82,6 +82,9 @@ class ConvertBash {
                 this.userDefinedFunctions.push(command);
                 return '';
             case 'Word':
+                if (text === '') {
+                    return '""';
+                }
                 if (text && text.indexOf(' ') >= 0 && !text.startsWith('"')) {
                     return `"${text}"`;
                 }
@@ -98,6 +101,13 @@ class ConvertBash {
                     default:
                         return `REM UNKNOWN operand "${command.op}" in: ${JSON.stringify(command)}`;
                 }
+            case 'CompoundList':
+                return command.commands.map(c => this.convertCommand(c)).join('\n');
+            case 'If':
+                // note: AND/OR is not supported with batch IF (https://stackoverflow.com/a/2143203/2544163)
+                const condition = this.convertCommand(command.clause.commands[0]).replace(/^\[ | ]$/g, '');
+                const elseBranch = command.else ? ` ELSE (\n${this.indent(this.convertCommand(command.else))}\n)` : '';
+                return `IF ${condition} (\n${this.indent(this.convertCommand(command.then))}\n)${elseBranch}`;
         }
         return 'REM UNKNOWN: ' + JSON.stringify(command);
     }
@@ -113,6 +123,9 @@ class ConvertBash {
         }).join('\n')}`
     }
 
+    private indent(s: string): string {
+        return s.split('\n').map(line => `  ${line}`).join('\n');
+    }
 }
 
 
