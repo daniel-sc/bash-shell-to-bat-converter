@@ -1,7 +1,7 @@
 // patch for irrelevant node dependency of bash-parser:
 if (typeof window === 'undefined') {
     // @ts-ignore
-    let window = {process: {env: {NODE_NEV: 'mock'}}};
+    let window = {process: {env: {NODE_NEV: 'mock'}}}; // lgtm [js/unused-local-variable]
     // @ts-ignore
 } else if (!window.process) {
     // @ts-ignore
@@ -71,7 +71,7 @@ class ConvertBash {
                             return this.cpHandler.handle(command);
 
                         default:
-                            return `${command.name.text}${suffix}`
+                            return `${command.name.text}${suffix}`;
                     }
                 }
                 return 'unknown command: ' + JSON.stringify(command);

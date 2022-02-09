@@ -7,7 +7,7 @@ export class CpHandler implements CommandHandler {
     }
 
     handle(command: any): string {
-        const {singleDashParams, doubleDashParams, argList} = splitParams(command);
+        const {singleDashParams, argList} = splitParams(command);
         const winParams: string[] = [];
         singleDashParams.forEach(suffix => {
             if (suffix.text.indexOf('d') >= 0) {

@@ -2,6 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/bash-converter)](https://www.npmjs.com/package/bash-converter)
 [![Coverage Status](https://coveralls.io/repos/github/daniel-sc/bash-shell-to-bat-converter/badge.svg?branch=master)](https://coveralls.io/github/daniel-sc/bash-shell-to-bat-converter?branch=master)
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/daniel-sc/bash-shell-to-bat-converter.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/daniel-sc/bash-shell-to-bat-converter/context:javascript)
 
 Converts bash scripts (`*.sh`) to windows batch files (`*.bat`). 
 This is _not_ supposed to be a fully complete/correct tool, but rather a starting point when converting scripts. 
