@@ -82,13 +82,11 @@ class ConvertBash {
                 this.userDefinedFunctions.push(command);
                 return '';
             case 'Word':
-                if (text === '') {
-                    return '""';
-                }
-                if (text && text.indexOf(' ') >= 0 && !text.startsWith('"')) {
+                if (text.startsWith('"') || ['==', '!='].includes(text)) {
+                    return text;
+                } else {
                     return `"${text}"`;
                 }
-                return text;
             case 'AssignmentWord':
                 const [variableName, variableValue] = text.split('=', 2);
                 return `SET ${variableName}=${variableValue}`;
@@ -105,9 +103,21 @@ class ConvertBash {
                 return command.commands.map(c => this.convertCommand(c)).join('\n');
             case 'If':
                 // note: AND/OR is not supported with batch IF (https://stackoverflow.com/a/2143203/2544163)
-                const condition = this.convertCommand(command.clause.commands[0]).replace(/^\[ | ]$/g, '');
+                const condition = this.convertCommand(command.clause.commands[0]).replace(/^\[ |^"\[" | "]"$/g, '');
                 const elseBranch = command.else ? ` ELSE (\n${this.indent(this.convertCommand(command.else))}\n)` : '';
                 return `IF ${condition} (\n${this.indent(this.convertCommand(command.then))}\n)${elseBranch}`;
+            case 'Case':
+                const caseStatement = this.convertCommand(command.clause);
+                return command.cases.map((c, i) => {
+                    const pattern = c.pattern[0]; // this is a list for unclear reason..
+                    // simple heuristic: '*' is default case:
+                    if (pattern.text === '*') {
+                        return ` ELSE (\n${this.indent(this.convertCommand(c.body))}\n)`;
+                    }
+                    const caseCondition = `${caseStatement}==${this.convertCommand(pattern)}`;
+                    const prefix = i === 0 ? 'IF' : ' ELSE IF';
+                    return `${prefix} ${caseCondition} (\n${this.indent(this.convertCommand(c.body))}\n)`;
+                }).join('');
         }
         return 'REM UNKNOWN: ' + JSON.stringify(command);
     }

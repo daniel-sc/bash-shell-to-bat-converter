@@ -12,13 +12,13 @@ describe('convert-bash', () => {
                 '@echo off\n' +
                 '\n' +
                 'SET SOME_VAR=c:\\cygwin\\path\n' +
-                'DEL /S %SOME_VAR%'
+                'DEL /S "%SOME_VAR%"'
             );
         });
 
         test('should transform single command', () => {
             expect(convertBashToWin('rm -rf /c/cygwin/path'))
-                .toEqual('@echo off\n\nDEL /S c:\\cygwin\\path');
+                .toEqual('@echo off\n\nDEL /S "c:\\cygwin\\path"');
         });
 
         test('should handle "&&"', () => {
@@ -48,6 +48,29 @@ describe('convert-bash', () => {
                 .toEqual('@echo off\n\nIF "%my_var%" == "" (\n  echo "my_var is empty"\n) ELSE (\n  echo "my_var is not empty"\n)');
         });
 
+        test('should handle switch case', () => {
+            expect(convertBashToWin('case "$1" in\n' +
+                '  "Darwin")\n' +
+                '    echo "found darwin"\n' +
+                '    ;;\n' +
+                '  "Jesus")\n' +
+                '    echo "found jesus"\n' +
+                '    ;;\n' +
+                '  *)\n' +
+                '    echo "not found darwin nor jesus"\n' +
+                '    ;;\n' +
+                'esac'))
+                .toEqual('@echo off\n' +
+                    '\n' +
+                    'IF "%~1"=="Darwin" (\n' +
+                    '  echo "found darwin"\n' +
+                    ') ELSE IF "%~1"=="Jesus" (\n' +
+                    '  echo "found jesus"\n' +
+                    ') ELSE (\n' +
+                    '  echo "not found darwin nor jesus"\n' +
+                    ')');
+        });
+
         test('should transform complete example', () => {
             expect(convertBashToWin(
                 `#!/bin/bash
@@ -66,8 +89,8 @@ my_function "some param"
 `)).toEqual(`@echo off
 
 SET SOME_VAR=c:\\cygwin\\path
-DEL /S %SOME_VAR%
-COPY  c:\\some\\file \\to\\another\\file
+DEL /S "%SOME_VAR%"
+COPY  "c:\\some\\file" "\\to\\another\\file"
 CALL :my_function
 CALL :my_function "some param"
 
