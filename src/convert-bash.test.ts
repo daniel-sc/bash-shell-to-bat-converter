@@ -26,6 +26,45 @@ describe('convert-bash', () => {
                 .toEqual('@echo off\n\necho "hi 1" && echo "there 2"');
         });
 
+        describe('convertPaths', () => {
+            test('should convert win path', () => {
+                expect(convertBashToWin('mycommand /absolutepath'))
+                    .toEqual('@echo off\n\nmycommand "\\absolutepath"');
+            });
+            test('should convert cyg win path', () => {
+                expect(convertBashToWin('mycommand /c/cygwin/path'))
+                    .toEqual('@echo off\n\nmycommand "c:\\cygwin\\path"');
+            });
+            test('should convert relative path', () => {
+                expect(convertBashToWin('mycommand path/sub'))
+                    .toEqual('@echo off\n\nmycommand "path\\sub"');
+            });
+            test('should convert relative path current dir', () => {
+                expect(convertBashToWin('mycommand ./path'))
+                    .toEqual('@echo off\n\nmycommand "%CD%\\path"');
+            });
+            test('should convert relative path parent dir', () => {
+                expect(convertBashToWin('mycommand ../path'))
+                    .toEqual('@echo off\n\nmycommand "%CD%\\..\\path"');
+            });
+            test('should keep cd to parent dir', () => {
+                expect(convertBashToWin('cd ..'))
+                    .toEqual('@echo off\n\ncd ".."');
+            });
+            test('should convert file with extension', () => {
+                expect(convertBashToWin('mycommand path/file.txt'))
+                    .toEqual('@echo off\n\nmycommand "path\\file.txt"');
+            });
+            test('should handle simple url', () => {
+                expect(convertBashToWin('wget https://website.com'))
+                    .toEqual('@echo off\n\nwget "https://website.com"');
+            });
+            test('should handle url with query', () => {
+                expect(convertBashToWin('wget https://website.com/path?query=1'))
+                    .toEqual('@echo off\n\nwget "https://website.com/path?query=1"');
+            });
+        });
+
         test('should handle "||"', () => {
             expect(convertBashToWin('echo "hi 1" || echo "there 2"'))
                 .toEqual('@echo off\n\necho "hi 1" || echo "there 2"');

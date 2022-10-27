@@ -11,11 +11,19 @@ import parse from 'bash-parser'
 import {RmHandler} from './rm-handler';
 import {CpHandler} from './cp-handler';
 
-function changePath(path: string) {
-    return path
-        .replace(/^\/(\w)\//g, '$1:\\') // cygwin windows paths
-        .replace(/^\./, '%CD%')
-        .replace(/\//g, '\\');
+const pathPart = '(?:(?:[\\w\\d\\-\\._]*[\\w\\d][\\w\\d\\-\\._]*)|\\.{1,2})'; // assumption: path parts contain at least one letter or digit
+
+export function convertPaths(expandedText: string) {
+    if (/:\/\//.test(expandedText)) { // do not mess with urls
+        return expandedText;
+    }
+    return expandedText.replace(new RegExp(`${pathPart}?(?:/${pathPart})+$`), (path) => {
+        return path
+            .replace(/^\/(\w)\//g, '$1:\\') // cygwin windows paths
+            .replace(/^\.\//, '%CD%\\')
+            .replace(/^\.\.\//, '%CD%\\..\\')
+            .replace(/\//g, '\\');
+    });
 }
 
 function performExpansions(text?: string, expansions?: any[]): string {
@@ -32,8 +40,6 @@ function performExpansions(text?: string, expansions?: any[]): string {
 }
 
 
-const pathMatcher = /(\/?[.\w]+(?:[.\w]+\/)*\/?|\b\.\b)/ig;
-
 class ConvertBash {
 
     private readonly rmHandler = new RmHandler(c => this.convertCommand(c));
@@ -43,8 +49,8 @@ class ConvertBash {
 
     public convertCommand(command: any): string {
         console.log('convertCommand', command);
-        const text = performExpansions(command.text, command.expansion)
-            .replace(pathMatcher, match => changePath(match));
+        const expandedText = performExpansions(command.text, command.expansion);
+        const text = convertPaths(expandedText);
 
         switch (command.type) {
             case 'Command':
