@@ -1,6 +1,6 @@
 {
   "name": "bash-converter",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "converting simple bash/shell scripts to windows batch files",
   "main": "lib/cli.js",
   "bin": {
