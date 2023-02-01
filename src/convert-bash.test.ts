@@ -110,6 +110,22 @@ describe('convert-bash', () => {
                     ')');
         });
 
+        test('should handle function declaration with keyword', () => {
+            expect(convertBashToWin(`function my_function () {
+  echo "hello from my_function: $1"
+}`))
+                .toEqual(`@echo off
+
+
+
+EXIT /B %ERRORLEVEL%
+
+:my_function
+echo "hello from my_function: %~1"
+EXIT /B 0
+`);
+        });
+
         test('should transform complete example', () => {
             expect(convertBashToWin(
                 `#!/bin/bash

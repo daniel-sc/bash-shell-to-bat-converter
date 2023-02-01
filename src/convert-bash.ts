@@ -145,8 +145,13 @@ class ConvertBash {
 }
 
 
+function preprocess(script: string):string {
+    return script.replace(/^\s*function /g, '');
+}
+
 export function convertBashToWin(script: string) {
-    const ast = parse(script, {mode: 'bash'});
+    const preprocessedScript = preprocess(script);
+    const ast = parse(preprocessedScript, {mode: 'bash'});
     const converter = new ConvertBash();
     return '@echo off\n\n' +
         ast.commands
