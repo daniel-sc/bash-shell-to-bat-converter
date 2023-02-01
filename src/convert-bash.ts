@@ -146,7 +146,7 @@ class ConvertBash {
 
 
 function preprocess(script: string):string {
-    return script.replace(/^\s*function /g, '');
+    return script.replace(/(^|\n)\s*function /g, '$1');
 }
 
 export function convertBashToWin(script: string) {

@@ -110,13 +110,30 @@ describe('convert-bash', () => {
                     ')');
         });
 
-        test('should handle function declaration with keyword', () => {
+        test('should handle function declaration with keyword at start', () => {
             expect(convertBashToWin(`function my_function () {
   echo "hello from my_function: $1"
 }`))
                 .toEqual(`@echo off
 
 
+
+EXIT /B %ERRORLEVEL%
+
+:my_function
+echo "hello from my_function: %~1"
+EXIT /B 0
+`);
+        });
+
+        test('should handle function declaration with keyword in middle', () => {
+            expect(convertBashToWin(`echo "test"
+            function my_function () {
+  echo "hello from my_function: $1"
+}`))
+                .toEqual(`@echo off
+
+echo "test"
 
 EXIT /B %ERRORLEVEL%
 
