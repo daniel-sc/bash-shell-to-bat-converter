@@ -7,38 +7,11 @@ if (typeof window === 'undefined') {
     // @ts-ignore
     window.process = {env: {NODE_NEV: 'mock'}};
 }
+import {convertPaths} from './convert-paths';
+import {Expansion, Expression, isStatement, Script} from './types';
 import parse from 'bash-parser'
 import {RmHandler} from './rm-handler';
 import {CpHandler} from './cp-handler';
-
-const pathPart = '(?:(?:[\\w\\d\\-\\._]*[\\w\\d][\\w\\d\\-\\._]*)|\\.{1,2})'; // assumption: path parts contain at least one letter or digit
-
-export function convertPaths(expandedText: string) {
-    if (/:\/\//.test(expandedText)) { // do not mess with urls
-        return expandedText;
-    }
-    return expandedText.replace(new RegExp(`${pathPart}?(?:/${pathPart})+$`), (path) => {
-        return path
-            .replace(/^\/(\w)\//g, '$1:\\') // cygwin windows paths
-            .replace(/^\.\//, '%CD%\\')
-            .replace(/^\.\.\//, '%CD%\\..\\')
-            .replace(/\//g, '\\');
-    });
-}
-
-function performExpansions(text?: string, expansions?: any[]): string {
-    // currently assumes only ParameterExpansions (TODO CommandExpansion, ArithmeticExpansion)
-    let result = text || '';
-    const sortedExpansions = [...(expansions || [])];
-    sortedExpansions.sort((a, b) => a.loc.start > b.loc.start ? -1 : 1);
-    for (const expansion of sortedExpansions) {
-        // expand function parameters such as `$1` (-> `%~1`) different to regular variables `$MY`(-> `%MY%`):
-        const expandedValue = /^\d+$/.test(`${expansion.parameter}`) ? `%~${expansion.parameter}` : `%${expansion.parameter}%`;
-        result = `${result.substring(0, expansion.loc.start)}${expandedValue}${result.substring(expansion.loc.end + 1)}`;
-    }
-    return result;
-}
-
 
 class ConvertBash {
 
@@ -46,11 +19,18 @@ class ConvertBash {
     private readonly cpHandler = new CpHandler(c => this.convertCommand(c));
     private readonly userDefinedFunctionNames = new Set<string>();
     private readonly userDefinedFunctions: any[] = [];
+    private delayedExpansionActive = false;
+    private preStatements: string[] = [];
+    private interpolationCounter = 0;
 
-    public convertCommand(command: any): string {
+    public convertCommand(command: Expression): string {
+        const result = this.convertCommandCore(command);
+        const preStatements = isStatement(command) ? this.drainPreStatements() : '';
+        return preStatements + result;
+    }
+
+    private convertCommandCore(command: Expression): string {
         console.log('convertCommand', command);
-        const expandedText = performExpansions(command.text, command.expansion);
-        const text = convertPaths(expandedText);
 
         switch (command.type) {
             case 'Command':
@@ -59,13 +39,13 @@ class ConvertBash {
                 }
                 if (command.name && command.name.text) {
                     if (this.userDefinedFunctionNames.has(command.name.text)) {
-                        const params = command.suffix && command.suffix.length ? ' ' + command.suffix.map(this.convertCommand).join(' , ') : '';
+                        const params = command.suffix && command.suffix.length ? ' ' + command.suffix.map(x => this.convertCommand(x)).join(' , ') : '';
                         return `CALL :${command.name.text}${params}`;
                     }
                     const suffix = command.suffix ? ` ${command.suffix.map(c => this.convertCommand(c)).join(' ')}` : '';
                     switch (command.name.text) {
                         case 'set':
-                            if (command.suffix && command.suffix.length === 1 && command.suffix[0].text === '-e') {
+                            if (command.suffix && command.suffix.length === 1 && command.suffix[0].type === 'Word' && command.suffix[0].text === '-e') {
                                 console.log('skipping "set -e"');
                                 return '';
                             } else {
@@ -88,14 +68,21 @@ class ConvertBash {
                 this.userDefinedFunctions.push(command);
                 return '';
             case 'Word':
-                if (text.startsWith('"') || ['==', '!='].includes(text)) {
-                    return text;
+                const expandedWord = this.performExpansions(command.text, command.expansion);
+                const textWord = convertPaths(expandedWord);
+
+                if (textWord.startsWith('"') || ['==', '!='].includes(textWord)) {
+                    return textWord;
                 } else {
-                    return `"${text}"`;
+                    return `"${textWord}"`;
                 }
             case 'AssignmentWord':
-                const [variableName, variableValue] = text.split('=', 2);
-                return `SET ${variableName}=${variableValue}`;
+                const expandedAssignmentWord = this.performExpansions(command.text, command.expansion);
+                const textAssignmentWord = convertPaths(expandedAssignmentWord);
+
+                const [variableName, variableValue] = textAssignmentWord.split('=', 2);
+                const unquotedValue = variableValue.replace(/^"(.*)"$/, '$1');
+                return `SET "${variableName}=${unquotedValue}"`;
             case 'LogicalExpression':
                 switch (command.op) {
                     case 'and':
@@ -139,25 +126,62 @@ class ConvertBash {
         }).join('\n')}`
     }
 
+    private performExpansions(text?: string, expansions?: Expansion[]): string {
+        // currently assumes only ParameterExpansions (TODO ArithmeticExpansion)
+        let result = text || '';
+        const sortedExpansions = [...(expansions || [])];
+        sortedExpansions.sort((a, b) => a.loc.start > b.loc.start ? -1 : 1);
+        for (const expansion of sortedExpansions) {
+            switch (expansion.type) {
+                case 'CommandExpansion':
+                    this.delayedExpansionActive = true;
+                    const interpolationVar = `_INTERPOLATION_${this.interpolationCounter++}`;
+                    this.preStatements.push(`SET ${interpolationVar}=`);
+                    this.preStatements.push(`FOR /f "delims=" %%a in ('${expansion.command}') DO (SET "${interpolationVar}=!${interpolationVar}! %%a")`);
+                    result = `${result.substring(0, expansion.loc.start)}!${interpolationVar}!${result.substring(expansion.loc.end + 1)}`;
+                    break;
+                case 'ParameterExpansion':
+                    // expand function parameters such as `$1` (-> `%~1`) different to regular variables `$MY`(-> `%MY%` or `!MY!` if delayed expansion is active):
+                    const expandedValue = /^\d+$/.test(`${expansion.parameter}`) ? `%~${expansion.parameter}` : (this.delayedExpansionActive ? `!${expansion.parameter}!` : `%${expansion.parameter}%`);
+                    result = `${result.substring(0, expansion.loc.start)}${expandedValue}${result.substring(expansion.loc.end + 1)}`;
+                    break;
+            }
+        }
+        return result;
+    }
+
     private indent(s: string): string {
         return s.split('\n').map(line => `  ${line}`).join('\n');
+    }
+
+    delayedExpansion(): boolean {
+        return this.delayedExpansionActive;
+    }
+
+    private drainPreStatements() {
+        const result = this.preStatements.join('\n');
+        this.preStatements = [];
+        return result + (result ? '\n' : '');
     }
 }
 
 
-function preprocess(script: string):string {
+function preprocess(script: string): string {
     return script.replace(/(^|\n)\s*function /g, '$1');
 }
 
 export function convertBashToWin(script: string) {
     const preprocessedScript = preprocess(script);
-    const ast = parse(preprocessedScript, {mode: 'bash'});
+    const ast: Script = parse(preprocessedScript, {mode: 'bash'});
     const converter = new ConvertBash();
-    return '@echo off\n\n' +
-        ast.commands
-            .map(c => converter.convertCommand(c))
-            .filter((c: any) => !!c) // filter empty commands
-            .join('\n') +
+    const convertedCommands = ast.commands
+        .map(c => converter.convertCommand(c))
+        .filter((c: any) => !!c) // filter empty commands
+        .join('\n');
+    return '@echo off' +
+        (converter.delayedExpansion() ? '\nsetlocal EnableDelayedExpansion' : '') +
+        '\n\n' +
+        convertedCommands +
         converter.getFunctionDefinitions();
 }
 

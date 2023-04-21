@@ -11,7 +11,7 @@ describe('convert-bash', () => {
             )).toEqual(
                 '@echo off\n' +
                 '\n' +
-                'SET SOME_VAR=c:\\cygwin\\path\n' +
+                'SET "SOME_VAR=c:\\cygwin\\path"\n' +
                 'DEL /S "%SOME_VAR%"'
             );
         });
@@ -87,6 +87,34 @@ describe('convert-bash', () => {
                 .toEqual('@echo off\n\nIF "%my_var%" == "" (\n  echo "my_var is empty"\n) ELSE (\n  echo "my_var is not empty"\n)');
         });
 
+
+        test('should handle string interpolation with backticks', () => {
+            expect(convertBashToWin('my_var="test-`git log`"'))
+                .toEqual('@echo off\n' +
+                    'setlocal EnableDelayedExpansion\n\n' +
+                    'SET _INTERPOLATION_0=\n' +
+                    'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
+                    'SET "my_var=test-!_INTERPOLATION_0!"');
+        });
+        test('should echo variable correctly with delayed expansion', () => {
+            expect(convertBashToWin('my_var="test-`git log`"\necho $my_var'))
+                .toEqual('@echo off\n' +
+                    'setlocal EnableDelayedExpansion\n\n' +
+                    'SET _INTERPOLATION_0=\n' +
+                    'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
+                    'SET "my_var=test-!_INTERPOLATION_0!"\n' +
+                    'echo "!my_var!"');
+        });
+
+        test('should handle string interpolation with dollar brackets', () => {
+            expect(convertBashToWin('my_var="test-$(git log)"'))
+                .toEqual('@echo off\n' +
+                    'setlocal EnableDelayedExpansion\n\n' +
+                    'SET _INTERPOLATION_0=\n' +
+                    'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
+                    'SET "my_var=test-!_INTERPOLATION_0!"');
+        });
+
         test('should handle switch case', () => {
             expect(convertBashToWin('case "$1" in\n' +
                 '  "Darwin")\n' +
@@ -160,7 +188,7 @@ my_function
 my_function "some param"
 `)).toEqual(`@echo off
 
-SET SOME_VAR=c:\\cygwin\\path
+SET "SOME_VAR=c:\\cygwin\\path"
 DEL /S "%SOME_VAR%"
 COPY  "c:\\some\\file" "\\to\\another\\file"
 CALL :my_function
