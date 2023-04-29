@@ -3,18 +3,12 @@ import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {HighlightModule, HIGHLIGHT_OPTIONS} from 'ngx-highlightjs';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {HighlightModule} from 'ngx-highlightjs';
-import dos from 'highlight.js/lib/languages/dos';
 import {MatCardModule} from '@angular/material/card';
 
-export function hljsLanguages() {
-  return [
-    {name: 'dos', func: dos}
-  ];
-}
 
 @NgModule({
   declarations: [
@@ -27,12 +21,20 @@ export function hljsLanguages() {
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
-    HighlightModule.forRoot({
-      languages: hljsLanguages
-    }),
+    HighlightModule,
     MatCardModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HIGHLIGHT_OPTIONS,
+      useValue: {
+        coreLibraryLoader: () => import('highlight.js/lib/core'),
+        languages: {
+          dos: () => import('highlight.js/lib/languages/dos')
+        },
+      }
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {

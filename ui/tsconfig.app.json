@@ -4,14 +4,11 @@
     "outDir": "./out-tsc/app",
     "types": []
   },
-  "include": [
-    "src/**/*.ts"
+  "files": [
+    "src/main.ts",
+    "src/polyfills.ts"
   ],
-  "exclude": [
-    "src/test.ts",
-    "src/**/*.spec.ts",
-    "**/built-grammar.js",
-    "../node_modules/bash-parser/src/modes/posix/built-grammar.js",
-    "built-grammar.js"
+  "include": [
+    "src/**/*.d.ts"
   ]
 }
