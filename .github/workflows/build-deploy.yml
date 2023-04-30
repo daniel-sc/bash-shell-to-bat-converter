@@ -1,9 +1,11 @@
 name: Build and Deploy
 
 on:
+  pull_request:
   push:
     branches:
       - master
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-22.04
@@ -36,6 +38,6 @@ jobs:
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: ui/dist/bash-converter-ui
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: ui/dist/bash-converter-ui
