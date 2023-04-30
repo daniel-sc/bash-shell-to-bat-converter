@@ -105,6 +105,26 @@ describe('convert-bash', () => {
                     'SET "my_var=test-!_INTERPOLATION_0!"\n' +
                     'echo "!my_var!"');
         });
+        test('should activate delayed expansion for interpolation in function', () => {
+            expect(convertBashToWin(`function my_function () {
+  my_var="test-$(git log)"
+  echo "hello from my_function: $my_var"
+}`))
+                .toEqual(`@echo off
+setlocal EnableDelayedExpansion
+
+
+
+EXIT /B %ERRORLEVEL%
+
+:my_function
+SET _INTERPOLATION_0=
+FOR /f "delims=" %%a in ('git log') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")
+SET "my_var=test-!_INTERPOLATION_0!"
+echo "hello from my_function: !my_var!"
+EXIT /B 0
+`);
+        });
 
         test('should handle string interpolation with dollar brackets', () => {
             expect(convertBashToWin('my_var="test-$(git log)"'))

@@ -178,11 +178,12 @@ export function convertBashToWin(script: string) {
         .map(c => converter.convertCommand(c))
         .filter((c: any) => !!c) // filter empty commands
         .join('\n');
+    const functionDefinitions = converter.getFunctionDefinitions();
     return '@echo off' +
         (converter.delayedExpansion() ? '\nsetlocal EnableDelayedExpansion' : '') +
         '\n\n' +
         convertedCommands +
-        converter.getFunctionDefinitions();
+        functionDefinitions;
 }
 
 
