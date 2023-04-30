@@ -1,6 +1,11 @@
 h1 {
   margin-left: 10px;
 }
+
+pre {
+  margin: 0;
+}
+
 .container {
   width: 100%;
   display: flex;
@@ -14,7 +19,7 @@ h1 {
   }
 }
 
-.gh-banner {
+.github-banner {
   position: absolute;
   top: 0;
   right: 0;

@@ -1,19 +1,21 @@
 name: Build and Deploy
 
 on:
+  pull_request:
   push:
     branches:
       - master
+
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
-      - uses: actions/setup-node@v1 #this installs node and npm for us
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: '10.x'
-      - uses: actions/cache@v1
+          node-version: '18.x'
+      - uses: actions/cache@v2
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -34,8 +36,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: run-${{ matrix.node-version }}
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@releases/v3
+        uses: JamesIves/github-pages-deploy-action@v4
+        if: github.ref == 'refs/heads/master'
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: ui/dist/bash-converter-ui
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: ui/dist/bash-converter-ui

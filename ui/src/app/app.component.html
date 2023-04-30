@@ -10,7 +10,7 @@
   <mat-form-field appearance="outline" floatLabel="always" class="code code-bat">
     <mat-label>Converted Windows Batch</mat-label>
     <input matInput type="text" style="display: none">
-    <pre><code [highlight]="code$ | async"></code></pre>
+    <pre><code [highlight]="code$ | async" [languages]="['dos']" [lineNumbers]="false"></code></pre>
   </mat-form-field>
 
 </div>
@@ -18,7 +18,7 @@
 <!-- TODO copy button -->
 <!-- TODO hint for inserting clipboard -->
 
-<a class="gh-banner" href="https://github.com/daniel-sc/bash-shell-to-bat-converter">
+<a class="github-banner" href="https://github.com/daniel-sc/bash-shell-to-bat-converter">
   <img width="149" height="149"
        src="https://github.blog/wp-content/uploads/2008/12/forkme_right_gray_6d6d6d.png?resize=149%2C149"
        class="attachment-full size-full"
