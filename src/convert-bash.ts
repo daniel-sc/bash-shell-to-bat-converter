@@ -69,13 +69,30 @@ class ConvertBash {
                 return '';
             case 'Word':
                 const expandedWord = this.performExpansions(command.text, command.expansion);
-                const textWord = convertPaths(expandedWord);
+                let textWord = convertPaths(expandedWord);
 
-                if (textWord.startsWith('"') || ['==', '!='].includes(textWord)) {
-                    return textWord;
+                if (textWord.startsWith('"')) {
+                    /* Keep textWord as it is. */
+                } else if (['=='].includes(textWord)) {
+                    /* Keep textWord as it is. */
+                } else if (['!=', '-ne'].includes(textWord)) {
+                    textWord = 'NEQ';
+                } else if (['-eq'].includes(textWord)) {
+                    textWord = 'EQU';
+                } else if (['-lt'].includes(textWord)) {
+                    textWord = 'LSS';
+                } else if (['-le'].includes(textWord)) {
+                    textWord = 'LEQ';
+                } else if (['-gt'].includes(textWord)) {
+                    textWord = 'GTR';
+                } else if (['-ge'].includes(textWord)) {
+                    textWord = 'GEQ';
+                } else if (['!'].includes(textWord)) {
+                    textWord = 'NOT';
                 } else {
-                    return `"${textWord}"`;
+                    textWord = `"${textWord}"`;
                 }
+                return textWord;
             case 'AssignmentWord':
                 const expandedAssignmentWord = this.performExpansions(command.text, command.expansion);
                 const textAssignmentWord = convertPaths(expandedAssignmentWord);
@@ -185,8 +202,3 @@ export function convertBashToWin(script: string) {
         convertedCommands +
         functionDefinitions;
 }
-
-
-
-
-
