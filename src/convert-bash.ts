@@ -154,7 +154,7 @@ class ConvertBash {
                     this.delayedExpansionActive = true;
                     const interpolationVar = `_INTERPOLATION_${this.interpolationCounter++}`;
                     this.preStatements.push(`SET ${interpolationVar}=`);
-                    this.preStatements.push(`FOR /f "delims=" %%a in ('${expansion.command}') DO (SET "${interpolationVar}=!${interpolationVar}! %%a")`);
+                    this.preStatements.push(`FOR /f "delims=" %%a in ('${expansion.command}') DO (SET "${interpolationVar}=!${interpolationVar}!%%a")`);
                     result = `${result.substring(0, expansion.loc.start)}!${interpolationVar}!${result.substring(expansion.loc.end + 1)}`;
                     break;
                 case 'ParameterExpansion':
