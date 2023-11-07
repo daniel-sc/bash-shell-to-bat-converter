@@ -148,7 +148,7 @@ describe('convert-bash', () => {
                 .toEqual('@echo off\n' +
                     'setlocal EnableDelayedExpansion\n\n' +
                     'SET _INTERPOLATION_0=\n' +
-                    'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
+                    'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0!%%a")\n' +
                     'SET "my_var=test-!_INTERPOLATION_0!"');
         });
         test('should echo variable correctly with delayed expansion', () => {
@@ -156,7 +156,7 @@ describe('convert-bash', () => {
                 .toEqual('@echo off\n' +
                     'setlocal EnableDelayedExpansion\n\n' +
                     'SET _INTERPOLATION_0=\n' +
-                    'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
+                    'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0!%%a")\n' +
                     'SET "my_var=test-!_INTERPOLATION_0!"\n' +
                     'echo "!my_var!"');
         });
@@ -174,7 +174,7 @@ EXIT /B %ERRORLEVEL%
 
 :my_function
 SET _INTERPOLATION_0=
-FOR /f "delims=" %%a in ('git log') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")
+FOR /f "delims=" %%a in ('git log') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0!%%a")
 SET "my_var=test-!_INTERPOLATION_0!"
 echo "hello from my_function: !my_var!"
 EXIT /B 0
@@ -186,7 +186,7 @@ EXIT /B 0
                 .toEqual('@echo off\n' +
                     'setlocal EnableDelayedExpansion\n\n' +
                     'SET _INTERPOLATION_0=\n' +
-                    'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
+                    'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0!%%a")\n' +
                     'SET "my_var=test-!_INTERPOLATION_0!"');
         });
 
