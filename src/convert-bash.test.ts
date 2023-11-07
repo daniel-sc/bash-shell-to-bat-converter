@@ -87,6 +87,61 @@ describe('convert-bash', () => {
                 .toEqual('@echo off\n\nIF "%my_var%" == "" (\n  echo "my_var is empty"\n) ELSE (\n  echo "my_var is not empty"\n)');
         });
 
+        test('should handle simple if -eq', () => {
+            expect(convertBashToWin('if [ "$my_var" -eq "" ]; then\n' +
+                '  echo "my_var is empty"\n' +
+                '  echo "second line"\n' +
+                'fi'))
+                .toEqual('@echo off\n\nIF "%my_var%" EQU "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+        });
+
+        test('should handle simple if -ne', () => {
+            expect(convertBashToWin('if [ "$my_var" -ne "" ]; then\n' +
+                '  echo "my_var is empty"\n' +
+                '  echo "second line"\n' +
+                'fi'))
+                .toEqual('@echo off\n\nIF "%my_var%" NEQ "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+        });
+
+        test('should handle simple if -lt', () => {
+            expect(convertBashToWin('if [ "$my_var" -lt "" ]; then\n' +
+                '  echo "my_var is empty"\n' +
+                '  echo "second line"\n' +
+                'fi'))
+                .toEqual('@echo off\n\nIF "%my_var%" LSS "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+        });
+
+        test('should handle simple if -le', () => {
+            expect(convertBashToWin('if [ "$my_var" -le "" ]; then\n' +
+                '  echo "my_var is empty"\n' +
+                '  echo "second line"\n' +
+                'fi'))
+                .toEqual('@echo off\n\nIF "%my_var%" LEQ "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+        });
+
+        test('should handle simple if -gt', () => {
+            expect(convertBashToWin('if [ "$my_var" -gt "" ]; then\n' +
+                '  echo "my_var is empty"\n' +
+                '  echo "second line"\n' +
+                'fi'))
+                .toEqual('@echo off\n\nIF "%my_var%" GTR "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+        });
+
+        test('should handle simple if -ge', () => {
+            expect(convertBashToWin('if [ "$my_var" -ge "" ]; then\n' +
+                '  echo "my_var is empty"\n' +
+                '  echo "second line"\n' +
+                'fi'))
+                .toEqual('@echo off\n\nIF "%my_var%" GEQ "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+        });
+
+        test('should handle simple if not equal', () => {
+            expect(convertBashToWin('if [ ! "$my_var" == "" ]; then\n' +
+                '  echo "my_var is empty"\n' +
+                '  echo "second line"\n' +
+                'fi'))
+                .toEqual('@echo off\n\nIF NOT "%my_var%" == "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+        });
 
         test('should handle string interpolation with backticks', () => {
             expect(convertBashToWin('my_var="test-`git log`"'))
@@ -94,7 +149,7 @@ describe('convert-bash', () => {
                     'setlocal EnableDelayedExpansion\n\n' +
                     'SET _INTERPOLATION_0=\n' +
                     'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
-                    'SET "my_var=test-!_INTERPOLATION_0!"');
+                    'SET "my_var=test-!_INTERPOLATION_0:~1!"');
         });
         test('should echo variable correctly with delayed expansion', () => {
             expect(convertBashToWin('my_var="test-`git log`"\necho $my_var'))
@@ -102,7 +157,7 @@ describe('convert-bash', () => {
                     'setlocal EnableDelayedExpansion\n\n' +
                     'SET _INTERPOLATION_0=\n' +
                     'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
-                    'SET "my_var=test-!_INTERPOLATION_0!"\n' +
+                    'SET "my_var=test-!_INTERPOLATION_0:~1!"\n' +
                     'echo "!my_var!"');
         });
         test('should activate delayed expansion for interpolation in function', () => {
@@ -120,7 +175,7 @@ EXIT /B %ERRORLEVEL%
 :my_function
 SET _INTERPOLATION_0=
 FOR /f "delims=" %%a in ('git log') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")
-SET "my_var=test-!_INTERPOLATION_0!"
+SET "my_var=test-!_INTERPOLATION_0:~1!"
 echo "hello from my_function: !my_var!"
 EXIT /B 0
 `);
@@ -132,7 +187,7 @@ EXIT /B 0
                     'setlocal EnableDelayedExpansion\n\n' +
                     'SET _INTERPOLATION_0=\n' +
                     'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
-                    'SET "my_var=test-!_INTERPOLATION_0!"');
+                    'SET "my_var=test-!_INTERPOLATION_0:~1!"');
         });
 
         test('should handle switch case', () => {

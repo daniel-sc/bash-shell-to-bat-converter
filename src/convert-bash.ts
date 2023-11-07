@@ -69,13 +69,30 @@ class ConvertBash {
                 return '';
             case 'Word':
                 const expandedWord = this.performExpansions(command.text, command.expansion);
-                const textWord = convertPaths(expandedWord);
+                let textWord = convertPaths(expandedWord);
 
-                if (textWord.startsWith('"') || ['==', '!='].includes(textWord)) {
-                    return textWord;
+                if (textWord.startsWith('"')) {
+                    /* Keep textWord as it is. */
+                } else if (['=='].includes(textWord)) {
+                    /* Keep textWord as it is. */
+                } else if (['!=', '-ne'].includes(textWord)) {
+                    textWord = 'NEQ';
+                } else if (['-eq'].includes(textWord)) {
+                    textWord = 'EQU';
+                } else if (['-lt'].includes(textWord)) {
+                    textWord = 'LSS';
+                } else if (['-le'].includes(textWord)) {
+                    textWord = 'LEQ';
+                } else if (['-gt'].includes(textWord)) {
+                    textWord = 'GTR';
+                } else if (['-ge'].includes(textWord)) {
+                    textWord = 'GEQ';
+                } else if (['!'].includes(textWord)) {
+                    textWord = 'NOT';
                 } else {
-                    return `"${textWord}"`;
+                    textWord = `"${textWord}"`;
                 }
+                return textWord;
             case 'AssignmentWord':
                 const expandedAssignmentWord = this.performExpansions(command.text, command.expansion);
                 const textAssignmentWord = convertPaths(expandedAssignmentWord);
@@ -138,7 +155,7 @@ class ConvertBash {
                     const interpolationVar = `_INTERPOLATION_${this.interpolationCounter++}`;
                     this.preStatements.push(`SET ${interpolationVar}=`);
                     this.preStatements.push(`FOR /f "delims=" %%a in ('${expansion.command}') DO (SET "${interpolationVar}=!${interpolationVar}! %%a")`);
-                    result = `${result.substring(0, expansion.loc.start)}!${interpolationVar}!${result.substring(expansion.loc.end + 1)}`;
+                    result = `${result.substring(0, expansion.loc.start)}!${interpolationVar}:~1!${result.substring(expansion.loc.end + 1)}`;
                     break;
                 case 'ParameterExpansion':
                     // expand function parameters such as `$1` (-> `%~1`) different to regular variables `$MY`(-> `%MY%` or `!MY!` if delayed expansion is active):
@@ -185,8 +202,3 @@ export function convertBashToWin(script: string) {
         convertedCommands +
         functionDefinitions;
 }
-
-
-
-
-
