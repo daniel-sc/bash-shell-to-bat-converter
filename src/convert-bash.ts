@@ -158,9 +158,11 @@ class ConvertBash {
                     result = `${result.substring(0, expansion.loc.start)}!${interpolationVar}:~1!${result.substring(expansion.loc.end + 1)}`;
                     break;
                 case 'ParameterExpansion':
-                    // expand function parameters such as `$1` (-> `%~1`) different to regular variables `$MY`(-> `%MY%` or `!MY!` if delayed expansion is active):
-                    const expandedValue = /^\d+$/.test(`${expansion.parameter}`) ? `%~${expansion.parameter}` : (this.delayedExpansionActive ? `!${expansion.parameter}!` : `%${expansion.parameter}%`);
-                    result = `${result.substring(0, expansion.loc.start)}${expandedValue}${result.substring(expansion.loc.end + 1)}`;
+                    if (expansion.loc.start >= 0 && expansion.loc.end >= 0) { // in test 'should transform complete example' the loc is negative (and there is no meaningful expansion at that point)
+                        // expand function parameters such as `$1` (-> `%~1`) different to regular variables `$MY`(-> `%MY%` or `!MY!` if delayed expansion is active):
+                        const expandedValue = /^\d+$/.test(`${expansion.parameter}`) ? `%~${expansion.parameter}` : (this.delayedExpansionActive ? `!${expansion.parameter}!` : `%${expansion.parameter}%`);
+                        result = `${result.substring(0, expansion.loc.start)}${expandedValue}${result.substring(expansion.loc.end + 1)}`;
+                    }
                     break;
             }
         }
@@ -184,7 +186,14 @@ class ConvertBash {
 
 
 function preprocess(script: string): string {
-    return script.replace(/(^|\n)\s*function /g, '$1');
+    return script.replace(/(^|\n)\s*function /g, '$1')
+        .replace(/\n(?=\n)/g, '\n_BLANK_LINE_="x"')
+        .replace(/(^|\n)(?!#!)\s*#(.*)/g, '$1_COMMENT_="$2"');
+}
+
+function postprocess(script: string): string {
+    return script.replace(/SET "_COMMENT_= ?(.*)"/g, 'REM $1')
+        .replace(/SET "_BLANK_LINE_=x"/g, '');
 }
 
 export function convertBashToWin(script: string) {
@@ -198,7 +207,7 @@ export function convertBashToWin(script: string) {
     const functionDefinitions = converter.getFunctionDefinitions();
     return '@echo off' +
         (converter.delayedExpansion() ? '\nsetlocal EnableDelayedExpansion' : '') +
-        '\n\n' +
-        convertedCommands +
-        functionDefinitions;
+        '\n' +
+        postprocess(convertedCommands +
+        functionDefinitions);
 }
