@@ -16,6 +16,11 @@ describe('convert-bash', () => {
             );
         });
 
+        test('should handle simple full line comment', () => {
+            expect(convertBashToWin('echo "hi"\n# this is a comment'))
+                .toEqual('@echo off\n\necho "hi"\nREM this is a comment');
+        });
+
         test('should transform single command', () => {
             expect(convertBashToWin('rm -rf /c/cygwin/path'))
                 .toEqual('@echo off\n\nDEL /S "c:\\cygwin\\path"');
@@ -213,6 +218,24 @@ EXIT /B 0
                     ')');
         });
 
+        test('should handle function declaration with comment', () => {
+            expect(convertBashToWin(`function my_function () {
+  # this is a comment
+  echo "hello from my_function: $1"
+}`))
+                .toEqual(`@echo off
+
+
+
+EXIT /B %ERRORLEVEL%
+
+:my_function
+REM this is a comment
+echo "hello from my_function: %~1"
+EXIT /B 0
+`);
+        });
+
         test('should handle function declaration with keyword at start', () => {
             expect(convertBashToWin(`function my_function () {
   echo "hello from my_function: $1"
@@ -266,7 +289,9 @@ my_function "some param"
 SET "SOME_VAR=c:\\cygwin\\path"
 DEL /S "%SOME_VAR%"
 COPY  "c:\\some\\file" "\\to\\another\\file"
+REM call the function:
 CALL :my_function
+REM call the function with param:
 CALL :my_function "some param"
 
 EXIT /B %ERRORLEVEL%
