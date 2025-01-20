@@ -18,61 +18,66 @@ describe('convert-bash', () => {
 
         test('should handle simple full line comment', () => {
             expect(convertBashToWin('echo "hi"\n# this is a comment'))
-                .toEqual('@echo off\n\necho "hi"\nREM this is a comment');
+                .toEqual('@echo off\necho "hi"\nREM this is a comment');
+        });
+
+        test('should preserve empty lines', () => {
+           expect(convertBashToWin('echo "hi"\n\n\n# this is a comment'))
+               .toEqual('@echo off\necho "hi"\n\n\nREM this is a comment');
         });
 
         test('should transform single command', () => {
             expect(convertBashToWin('rm -rf /c/cygwin/path'))
-                .toEqual('@echo off\n\nDEL /S "c:\\cygwin\\path"');
+                .toEqual('@echo off\nDEL /S "c:\\cygwin\\path"');
         });
 
         test('should handle "&&"', () => {
             expect(convertBashToWin('echo "hi 1" && echo "there 2"'))
-                .toEqual('@echo off\n\necho "hi 1" && echo "there 2"');
+                .toEqual('@echo off\necho "hi 1" && echo "there 2"');
         });
 
         describe('convertPaths', () => {
             test('should convert win path', () => {
                 expect(convertBashToWin('mycommand /absolutepath'))
-                    .toEqual('@echo off\n\nmycommand "\\absolutepath"');
+                    .toEqual('@echo off\nmycommand "\\absolutepath"');
             });
             test('should convert cyg win path', () => {
                 expect(convertBashToWin('mycommand /c/cygwin/path'))
-                    .toEqual('@echo off\n\nmycommand "c:\\cygwin\\path"');
+                    .toEqual('@echo off\nmycommand "c:\\cygwin\\path"');
             });
             test('should convert relative path', () => {
                 expect(convertBashToWin('mycommand path/sub'))
-                    .toEqual('@echo off\n\nmycommand "path\\sub"');
+                    .toEqual('@echo off\nmycommand "path\\sub"');
             });
             test('should convert relative path current dir', () => {
                 expect(convertBashToWin('mycommand ./path'))
-                    .toEqual('@echo off\n\nmycommand "%CD%\\path"');
+                    .toEqual('@echo off\nmycommand "%CD%\\path"');
             });
             test('should convert relative path parent dir', () => {
                 expect(convertBashToWin('mycommand ../path'))
-                    .toEqual('@echo off\n\nmycommand "%CD%\\..\\path"');
+                    .toEqual('@echo off\nmycommand "%CD%\\..\\path"');
             });
             test('should keep cd to parent dir', () => {
                 expect(convertBashToWin('cd ..'))
-                    .toEqual('@echo off\n\ncd ".."');
+                    .toEqual('@echo off\ncd ".."');
             });
             test('should convert file with extension', () => {
                 expect(convertBashToWin('mycommand path/file.txt'))
-                    .toEqual('@echo off\n\nmycommand "path\\file.txt"');
+                    .toEqual('@echo off\nmycommand "path\\file.txt"');
             });
             test('should handle simple url', () => {
                 expect(convertBashToWin('wget https://website.com'))
-                    .toEqual('@echo off\n\nwget "https://website.com"');
+                    .toEqual('@echo off\nwget "https://website.com"');
             });
             test('should handle url with query', () => {
                 expect(convertBashToWin('wget https://website.com/path?query=1'))
-                    .toEqual('@echo off\n\nwget "https://website.com/path?query=1"');
+                    .toEqual('@echo off\nwget "https://website.com/path?query=1"');
             });
         });
 
         test('should handle "||"', () => {
             expect(convertBashToWin('echo "hi 1" || echo "there 2"'))
-                .toEqual('@echo off\n\necho "hi 1" || echo "there 2"');
+                .toEqual('@echo off\necho "hi 1" || echo "there 2"');
         });
 
         test('should handle simple if', () => {
@@ -80,7 +85,7 @@ describe('convert-bash', () => {
                 '  echo "my_var is empty"\n' +
                 '  echo "second line"\n' +
                 'fi'))
-                .toEqual('@echo off\n\nIF "%my_var%" == "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+                .toEqual('@echo off\nIF "%my_var%" == "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
         });
 
         test('should handle if-else', () => {
@@ -89,7 +94,7 @@ describe('convert-bash', () => {
                 'else\n' +
                 '  echo "my_var is not empty"\n' +
                 'fi'))
-                .toEqual('@echo off\n\nIF "%my_var%" == "" (\n  echo "my_var is empty"\n) ELSE (\n  echo "my_var is not empty"\n)');
+                .toEqual('@echo off\nIF "%my_var%" == "" (\n  echo "my_var is empty"\n) ELSE (\n  echo "my_var is not empty"\n)');
         });
 
         test('should handle simple if -eq', () => {
@@ -97,7 +102,7 @@ describe('convert-bash', () => {
                 '  echo "my_var is empty"\n' +
                 '  echo "second line"\n' +
                 'fi'))
-                .toEqual('@echo off\n\nIF "%my_var%" EQU "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+                .toEqual('@echo off\nIF "%my_var%" EQU "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
         });
 
         test('should handle simple if -ne', () => {
@@ -105,7 +110,7 @@ describe('convert-bash', () => {
                 '  echo "my_var is empty"\n' +
                 '  echo "second line"\n' +
                 'fi'))
-                .toEqual('@echo off\n\nIF "%my_var%" NEQ "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+                .toEqual('@echo off\nIF "%my_var%" NEQ "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
         });
 
         test('should handle simple if -lt', () => {
@@ -113,7 +118,7 @@ describe('convert-bash', () => {
                 '  echo "my_var is empty"\n' +
                 '  echo "second line"\n' +
                 'fi'))
-                .toEqual('@echo off\n\nIF "%my_var%" LSS "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+                .toEqual('@echo off\nIF "%my_var%" LSS "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
         });
 
         test('should handle simple if -le', () => {
@@ -121,7 +126,7 @@ describe('convert-bash', () => {
                 '  echo "my_var is empty"\n' +
                 '  echo "second line"\n' +
                 'fi'))
-                .toEqual('@echo off\n\nIF "%my_var%" LEQ "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+                .toEqual('@echo off\nIF "%my_var%" LEQ "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
         });
 
         test('should handle simple if -gt', () => {
@@ -129,7 +134,7 @@ describe('convert-bash', () => {
                 '  echo "my_var is empty"\n' +
                 '  echo "second line"\n' +
                 'fi'))
-                .toEqual('@echo off\n\nIF "%my_var%" GTR "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+                .toEqual('@echo off\nIF "%my_var%" GTR "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
         });
 
         test('should handle simple if -ge', () => {
@@ -137,7 +142,7 @@ describe('convert-bash', () => {
                 '  echo "my_var is empty"\n' +
                 '  echo "second line"\n' +
                 'fi'))
-                .toEqual('@echo off\n\nIF "%my_var%" GEQ "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+                .toEqual('@echo off\nIF "%my_var%" GEQ "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
         });
 
         test('should handle simple if not equal', () => {
@@ -145,13 +150,13 @@ describe('convert-bash', () => {
                 '  echo "my_var is empty"\n' +
                 '  echo "second line"\n' +
                 'fi'))
-                .toEqual('@echo off\n\nIF NOT "%my_var%" == "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
+                .toEqual('@echo off\nIF NOT "%my_var%" == "" (\n  echo "my_var is empty"\n  echo "second line"\n)');
         });
 
         test('should handle string interpolation with backticks', () => {
             expect(convertBashToWin('my_var="test-`git log`"'))
                 .toEqual('@echo off\n' +
-                    'setlocal EnableDelayedExpansion\n\n' +
+                    'setlocal EnableDelayedExpansion\n' +
                     'SET _INTERPOLATION_0=\n' +
                     'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
                     'SET "my_var=test-!_INTERPOLATION_0:~1!"');
@@ -159,7 +164,7 @@ describe('convert-bash', () => {
         test('should echo variable correctly with delayed expansion', () => {
             expect(convertBashToWin('my_var="test-`git log`"\necho $my_var'))
                 .toEqual('@echo off\n' +
-                    'setlocal EnableDelayedExpansion\n\n' +
+                    'setlocal EnableDelayedExpansion\n' +
                     'SET _INTERPOLATION_0=\n' +
                     'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
                     'SET "my_var=test-!_INTERPOLATION_0:~1!"\n' +
@@ -172,7 +177,6 @@ describe('convert-bash', () => {
 }`))
                 .toEqual(`@echo off
 setlocal EnableDelayedExpansion
-
 
 
 EXIT /B %ERRORLEVEL%
@@ -189,7 +193,7 @@ EXIT /B 0
         test('should handle string interpolation with dollar brackets', () => {
             expect(convertBashToWin('my_var="test-$(git log)"'))
                 .toEqual('@echo off\n' +
-                    'setlocal EnableDelayedExpansion\n\n' +
+                    'setlocal EnableDelayedExpansion\n' +
                     'SET _INTERPOLATION_0=\n' +
                     'FOR /f "delims=" %%a in (\'git log\') DO (SET "_INTERPOLATION_0=!_INTERPOLATION_0! %%a")\n' +
                     'SET "my_var=test-!_INTERPOLATION_0:~1!"');
@@ -208,7 +212,6 @@ EXIT /B 0
                 '    ;;\n' +
                 'esac'))
                 .toEqual('@echo off\n' +
-                    '\n' +
                     'IF "%~1"=="Darwin" (\n' +
                     '  echo "found darwin"\n' +
                     ') ELSE IF "%~1"=="Jesus" (\n' +
@@ -224,7 +227,6 @@ EXIT /B 0
   echo "hello from my_function: $1"
 }`))
                 .toEqual(`@echo off
-
 
 
 EXIT /B %ERRORLEVEL%
@@ -243,7 +245,6 @@ EXIT /B 0
                 .toEqual(`@echo off
 
 
-
 EXIT /B %ERRORLEVEL%
 
 :my_function
@@ -258,7 +259,6 @@ EXIT /B 0
   echo "hello from my_function: $1"
 }`))
                 .toEqual(`@echo off
-
 echo "test"
 
 EXIT /B %ERRORLEVEL%
@@ -289,6 +289,7 @@ my_function "some param"
 SET "SOME_VAR=c:\\cygwin\\path"
 DEL /S "%SOME_VAR%"
 COPY  "c:\\some\\file" "\\to\\another\\file"
+
 REM call the function:
 CALL :my_function
 REM call the function with param:

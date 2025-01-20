@@ -187,11 +187,13 @@ class ConvertBash {
 
 function preprocess(script: string): string {
     return script.replace(/(^|\n)\s*function /g, '$1')
+        .replace(/\n(?=\n)/g, '\n_BLANK_LINE_="x"')
         .replace(/(^|\n)(?!#!)\s*#(.*)/g, '$1_COMMENT_="$2"');
 }
 
 function postprocess(script: string): string {
-    return script.replace(/SET "_COMMENT_= ?(.*)"/g, 'REM $1');
+    return script.replace(/SET "_COMMENT_= ?(.*)"/g, 'REM $1')
+        .replace(/SET "_BLANK_LINE_=x"/g, '');
 }
 
 export function convertBashToWin(script: string) {
@@ -205,7 +207,7 @@ export function convertBashToWin(script: string) {
     const functionDefinitions = converter.getFunctionDefinitions();
     return '@echo off' +
         (converter.delayedExpansion() ? '\nsetlocal EnableDelayedExpansion' : '') +
-        '\n\n' +
+        '\n' +
         postprocess(convertedCommands +
         functionDefinitions);
 }
